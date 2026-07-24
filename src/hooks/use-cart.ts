@@ -17,6 +17,18 @@ interface CartStore {
   getTotal: () => number;
 }
 
+function resolveTieredUnitPrice(product: Product, quantity: number) {
+  const eligibleTierPrices = product.tierPricing
+    .filter((tier) => quantity >= tier.minQuantity)
+    .map((tier) => tier.unitPrice);
+
+  if (eligibleTierPrices.length === 0) {
+    return product.msrp;
+  }
+
+  return Math.min(...eligibleTierPrices);
+}
+
 export const useCart = create<CartStore>()(
   persist(
     (set, get) => ({
@@ -31,14 +43,24 @@ export const useCart = create<CartStore>()(
           const newQty = existingItem.quantity + quantity;
           set({
             items: currentItems.map((i) =>
-              i.product.id === product.id ? { ...i, quantity: newQty } : i,
+              i.product.id === product.id
+                ? {
+                    ...i,
+                    quantity: newQty,
+                    unitPrice: resolveTieredUnitPrice(product, newQty),
+                  }
+                : i,
             ),
           });
         } else {
           set({
             items: [
               ...currentItems,
-              { product, quantity, unitPrice: product.msrp },
+              {
+                product,
+                quantity,
+                unitPrice: resolveTieredUnitPrice(product, quantity),
+              },
             ],
           });
         }
@@ -52,8 +74,16 @@ export const useCart = create<CartStore>()(
           );
           if (idx > -1) {
             currentItems[idx].quantity += quantity;
+            currentItems[idx].unitPrice = resolveTieredUnitPrice(
+              product,
+              currentItems[idx].quantity,
+            );
           } else {
-            currentItems.push({ product, quantity, unitPrice: product.msrp });
+            currentItems.push({
+              product,
+              quantity,
+              unitPrice: resolveTieredUnitPrice(product, quantity),
+            });
           }
         });
         set({ items: currentItems });

@@ -14,7 +14,7 @@ You are an expert Frontend Engineer and Next.js architect. You are helping me bu
 
 - [cite_start]`src/app/(b2c)/`: Retail customer pages and layouts (focused on discovery, lifestyle, and simple account management)[cite: 13, 14, 20].
 - [cite_start]`src/app/(b2b)/`: Wholesale business pages and layouts (focused on density, speed, analytics, and procurement management)[cite: 13, 14, 20, 108].
-- [cite_start]`src/middleware.ts`: Intercepts incoming requests, reads the Auth.js session token, and automatically routes wholesale roles to `(b2b)` and retail/guest users to `(b2c)`[cite: 8, 9, 10].
+- [cite_start]`src/proxy.ts`: Intercepts incoming requests, reads the Auth.js session token, and automatically routes wholesale roles to `(b2b)` and retail/guest users to `(b2c)`[cite: 8, 9, 10].
 
 ## 3. Mock Authentication & Product Domain Constraints
 
@@ -145,5 +145,5 @@ src/
 │   ├── auth.ts                           # Auth.js configuration & credentials provider
 │   └── utils.ts                          # shadcn utility helpers (cn)
 │
-└── middleware.ts                         # Role-based route protection & auto-redirects
+└── proxy.ts                              # Role-based route protection & auto-redirects
 ```
