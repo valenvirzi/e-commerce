@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, PackageCheck, RotateCcw } from "lucide-react";
 
+import { OrderSpendChart } from "@/components/b2c/order-spend-chart";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -10,7 +11,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getOrdersByUserId, getUserByEmail } from "@/lib/mock-db";
+import {
+  getB2CAnalytics,
+  getOrdersByUserId,
+  getUserByEmail,
+} from "@/lib/mock-db";
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("en-US", {
@@ -26,7 +31,12 @@ export default async function B2COrdersPage() {
     throw new Error("B2C user fixture is missing.");
   }
 
-  const orders = await getOrdersByUserId(user.id);
+  const [orders, analytics] = await Promise.all([
+    getOrdersByUserId(user.id),
+    getB2CAnalytics(user.id),
+  ]);
+
+  const latestOrder = orders[0];
 
   return (
     <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
@@ -92,30 +102,65 @@ export default async function B2COrdersPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-slate-200/80 bg-slate-950 text-white shadow-xl shadow-slate-950/10">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base text-white">
-              <RotateCcw className="size-4 text-emerald-300" />
-              Buy again
-            </CardTitle>
-            <CardDescription className="text-slate-300">
-              Jump back into the catalog and repeat a previous order pattern.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-slate-300">
-              The consumer history page is ready for a future single-click
-              re-order action.
-            </p>
-            <Link
-              href="/products"
-              className={buttonVariants({ variant: "default" }) + " w-full"}
-            >
-              Browse products
-              <ArrowRight className="size-4" />
-            </Link>
-          </CardContent>
-        </Card>
+        <div className="space-y-6">
+          <OrderSpendChart data={analytics.monthlySpend} />
+
+          <Card className="border-slate-200/80 bg-slate-950 text-white shadow-xl shadow-slate-950/10">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base text-white">
+                <RotateCcw className="size-4 text-emerald-300" />
+                Buy again
+              </CardTitle>
+              <CardDescription className="text-slate-300">
+                Jump back into the catalog and repeat a previous order pattern.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {latestOrder ? (
+                <div className="rounded-3xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
+                  <div className="font-medium text-white">{latestOrder.id}</div>
+                  <div className="mt-1">
+                    {latestOrder.items.length} item line
+                    {latestOrder.items.length > 1 ? "s" : ""} ·{" "}
+                    {formatCurrency(latestOrder.totalAmount)}
+                  </div>
+                </div>
+              ) : null}
+              <p className="text-sm text-slate-300">
+                The consumer history page is ready for a future single-click
+                re-order action.
+              </p>
+              <Link
+                href="/products"
+                className={buttonVariants({ variant: "default" }) + " w-full"}
+              >
+                Browse products
+                <ArrowRight className="size-4" />
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      <section className="grid gap-4 lg:grid-cols-3">
+        {analytics.categorySpend.map((category) => (
+          <Card
+            key={category.category}
+            className="border-slate-200/80 bg-white/90 shadow-sm dark:border-slate-800 dark:bg-slate-950/80"
+          >
+            <CardHeader>
+              <CardTitle className="text-base">{category.category}</CardTitle>
+              <CardDescription>
+                Category share of the consumer basket.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-semibold">
+                {formatCurrency(category.amount)}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </section>
     </div>
   );
