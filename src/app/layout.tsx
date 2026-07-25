@@ -29,6 +29,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      data-scroll-behavior="smooth"
       className={cn(
         "h-full scroll-smooth antialiased",
         geistSans.variable,
@@ -37,7 +38,7 @@ export default function RootLayout({
         "font-sans",
       )}
     >
-      <body className="min-h-full bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.12),transparent_34%),linear-gradient(180deg,#f8fafc_0%,#eef2ff_100%)] text-slate-950 dark:bg-slate-950 dark:text-slate-50">
+      <body className="min-h-full bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.12),transparent_34%),linear-gradient(180deg,#f8fafc_0%,#eef2ff_100%)] text-slate-950 dark:bg-slate-950 dark:text-slate-50">
         {children}
       </body>
     </html>

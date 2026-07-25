@@ -32,6 +32,14 @@ export default function B2CLayout({
               Apex Supply Network
             </Link>
             <div className="ml-auto flex items-center gap-3">
+              <Link
+                href="/login"
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "sm" }),
+                )}
+              >
+                Wholesale login
+              </Link>
               <CartSheet />
             </div>
           </div>
